@@ -1,4 +1,7 @@
-import { Layout, Skeleton } from 'antd'
+import { LoginOutlined } from '@ant-design/icons'
+import { ApolloProvider } from '@apollo/client'
+import { Button, Divider, Input, Layout } from 'antd'
+import { client } from './apollo'
 import './App.css'
 import { FriendsList, HeaderBar, ScheduleTable } from './components'
 
@@ -19,36 +22,63 @@ function SignIn() {
       >
         <HeaderBar isAuthed={false} />
       </Header>
-      <Layout>
-        <Sider
-          width={300}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            backgroundColor: 'whitesmoke',
-            padding: 8,
-            paddingTop: 20,
-          }}
-        >
-          <Skeleton active />
-        </Sider>
-        <Content
+
+      <Content
+        style={{
+          padding: 20,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 20,
+        }}
+      >
+        <div
           style={{
             padding: 20,
             display: 'flex',
             flexDirection: 'column',
-            gap: 20,
+            alignItems: 'center',
+            gap: 10,
           }}
         >
-          <Skeleton active />
-        </Content>
-      </Layout>
+          <h2>Log In</h2>
+          <Input placeholder='Enter email'></Input>
+          <Input.Password placeholder='Enter password'></Input.Password>
+          <Button icon={<LoginOutlined />}>Log In</Button>
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: 400,
+            alignItems: 'center',
+          }}
+        >
+          <Divider type='vertical' style={{ flex: 1 }} />
+          <span>or</span>
+          <Divider type='vertical' style={{ flex: 1 }} />
+        </div>
+        <div
+          style={{
+            padding: 20,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 10,
+          }}
+        >
+          <h2>Sign Up</h2>
+          <Input placeholder='Enter email'></Input>
+          <Input.Password placeholder='Enter password'></Input.Password>
+          <Button icon={<LoginOutlined />}>Sign Up</Button>
+        </div>
+      </Content>
     </Layout>
   )
 }
 
-export default function App() {
-  if (false) return <SignIn />
+function AppPage() {
+  if (!true) return <SignIn />
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -89,5 +119,13 @@ export default function App() {
         </Content>
       </Layout>
     </Layout>
+  )
+}
+
+export default function App() {
+  return (
+    <ApolloProvider client={client}>
+      <AppPage />
+    </ApolloProvider>
   )
 }

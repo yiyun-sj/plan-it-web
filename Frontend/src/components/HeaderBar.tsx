@@ -1,4 +1,4 @@
-import { LoginOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons'
+import { LogoutOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Popover, Tooltip, Typography } from 'antd'
 
 import { Avatar } from 'antd'
@@ -9,7 +9,7 @@ export function HeaderBar({ isAuthed }: { isAuthed: boolean }) {
   return (
     <>
       <Title style={{ margin: 0 }}>Plan-It</Title>
-      {isAuthed ? (
+      {isAuthed && (
         <Popover
           content={
             <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -30,8 +30,6 @@ export function HeaderBar({ isAuthed }: { isAuthed: boolean }) {
             style={{ cursor: 'pointer' }}
           />
         </Popover>
-      ) : (
-        <Button icon={<LoginOutlined />}>Sign In</Button>
       )}
     </>
   )

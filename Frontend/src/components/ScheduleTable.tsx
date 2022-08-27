@@ -2,21 +2,22 @@ import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { Button, DatePicker, Empty, Input, message, Modal } from 'antd'
 import { Moment } from 'moment'
 import { useMemo, useState } from 'react'
+import { Friend, Schedule } from '../types'
 import { FriendsList } from './FriendsList'
 
 export function ScheduleTable() {
-  const [schedules, setSchedules] = useState<string[]>([])
+  const [schedules, setSchedules] = useState<Schedule[]>([])
   const [search, setSearch] = useState('')
   const [isVisible, setIsVisible] = useState(false)
   const [dates, setDates] = useState<[Moment | null, Moment | null] | null>(
     null
   )
   const [confirmLoading, setConfirmLoading] = useState(false)
-  const [friends, setFriends] = useState<string[]>([])
+  const [friends, setFriends] = useState<Friend[]>([])
 
   const filteredSchedules = useMemo(() => {
     if (!search) return schedules
-    return schedules.filter((schedule) => schedule === search)
+    return schedules.filter((schedule) => schedule.title === search)
   }, [schedules, search])
 
   return (
@@ -58,7 +59,7 @@ export function ScheduleTable() {
         confirmLoading={confirmLoading}
         onCancel={() => setIsVisible(false)}
         onOk={() => {
-          if (!dates || !dates[0] || !dates[1] || friends.length === 0) {
+          if (!dates || !dates[0] || !dates[1]) {
             message.error('Missing field')
             return
           }

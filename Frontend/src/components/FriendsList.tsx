@@ -1,15 +1,16 @@
 import { CloseCircleOutlined } from '@ant-design/icons'
 import { AutoComplete, Avatar, Badge, Button, Divider, Empty } from 'antd'
 import { useState } from 'react'
+import { Friend } from '../types'
 
 export function FriendsList({
   isMinimal,
   setParentFriends,
 }: {
   isMinimal?: boolean
-  setParentFriends?: React.Dispatch<React.SetStateAction<string[]>>
+  setParentFriends?: React.Dispatch<React.SetStateAction<Friend[]>>
 }) {
-  const [friends, setFriends] = useState<string[]>([])
+  const [friends, setFriends] = useState<Friend[]>([])
   return (
     <>
       <AutoComplete
