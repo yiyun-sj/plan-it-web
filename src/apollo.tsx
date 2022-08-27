@@ -1,7 +1,7 @@
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 
-const URI = 'http://192.168.2.13:4000/'
+const URI = 'http://planitapi.herokuapp.com/'
 
 const httpLink = createHttpLink({
   uri: URI,
