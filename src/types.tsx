@@ -1,6 +1,6 @@
 export type Schedule = {
   title: string
-  isPrimary: string
+  isActive: number
   id: string
 }
 

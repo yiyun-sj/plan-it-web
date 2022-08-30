@@ -1,13 +1,77 @@
 import { LoginOutlined } from '@ant-design/icons'
-import { ApolloProvider } from '@apollo/client'
-import { Button, Divider, Input, Layout } from 'antd'
+import { ApolloProvider, useMutation } from '@apollo/client'
+import { Button, Divider, Input, Layout, message } from 'antd'
+import { useEffect, useState } from 'react'
 import { client } from './apollo'
 import './App.css'
 import { FriendsList, HeaderBar, ScheduleTable } from './components'
+import { SIGN_IN_MUTATION, SIGN_UP_MUTATION } from './constants'
 
 const { Header, Sider, Content } = Layout
 
-function SignIn() {
+function SignIn({
+  setIsAuthenticated,
+}: {
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>
+}) {
+  const [signInEmail, setSignInEmail] = useState('')
+  const [signInPassword, setSignInPassword] = useState('')
+
+  const [signUpEmail, setSignUpEmail] = useState('')
+  const [signUpName, setSignUpName] = useState('')
+  const [signUpPassword, setSignUpPassword] = useState('')
+
+  useEffect(() => {
+    const token = window.localStorage.getItem('token')
+    if (token) {
+      setIsAuthenticated(true)
+    }
+  }, [setIsAuthenticated])
+
+  const [signUp, { loading: signUpLoading }] = useMutation(SIGN_UP_MUTATION)
+  const [signIn, { loading: signInLoading }] = useMutation(SIGN_IN_MUTATION)
+
+  const onConfirmSignIn = () => {
+    if (!signInEmail || !signInPassword) {
+      message.error('Required fields not filled')
+      return
+    }
+    signIn({
+      variables: { email: signInEmail, password: signInPassword },
+    })
+      .then((res) => {
+        window.localStorage.setItem('token', res.data.signIn.token)
+        setIsAuthenticated(true)
+        message.success('Sign in success')
+      })
+      .catch((error) => {
+        console.error('Sign in error', error)
+        message.error('Error occurred during sign in')
+      })
+  }
+  const onConfirmSignUp = () => {
+    if (!signUpEmail || !signUpPassword || !signUpName) {
+      message.error('Required fields not filled')
+      return
+    }
+    signUp({
+      variables: {
+        name: signUpName,
+        email: signUpEmail,
+        password: signUpPassword,
+      },
+    })
+      .then((res) => {
+        window.localStorage.setItem('token', res.data.signUp.token)
+        setIsAuthenticated(true)
+        message.success('Sign up success')
+      })
+      .catch((error) => {
+        console.error('Sign up error', error)
+        message.error('Error occurred during sign up')
+      })
+  }
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Header
@@ -42,9 +106,23 @@ function SignIn() {
           }}
         >
           <h2>Log In</h2>
-          <Input placeholder='Enter email'></Input>
-          <Input.Password placeholder='Enter password'></Input.Password>
-          <Button icon={<LoginOutlined />}>Log In</Button>
+          <Input
+            placeholder='Enter email'
+            value={signInEmail}
+            onChange={(e) => setSignInEmail(e.currentTarget.value)}
+          />
+          <Input.Password
+            placeholder='Enter password'
+            value={signInPassword}
+            onChange={(e) => setSignInPassword(e.currentTarget.value)}
+          />
+          <Button
+            icon={<LoginOutlined />}
+            loading={signInLoading}
+            onClick={onConfirmSignIn}
+          >
+            Log In
+          </Button>
         </div>
         <div
           style={{
@@ -68,18 +146,39 @@ function SignIn() {
           }}
         >
           <h2>Sign Up</h2>
-          <Input placeholder='Enter email'></Input>
-          <Input.Password placeholder='Enter password'></Input.Password>
-          <Button icon={<LoginOutlined />}>Sign Up</Button>
+          <Input
+            placeholder='Enter name'
+            value={signUpName}
+            onChange={(e) => setSignUpName(e.currentTarget.value)}
+          />
+          <Input
+            placeholder='Enter email'
+            value={signUpEmail}
+            onChange={(e) => setSignUpEmail(e.currentTarget.value)}
+          />
+          <Input.Password
+            placeholder='Enter password'
+            value={signUpPassword}
+            onChange={(e) => setSignUpPassword(e.currentTarget.value)}
+          />
+          <Button
+            icon={<LoginOutlined />}
+            loading={signUpLoading}
+            onClick={onConfirmSignUp}
+          >
+            Sign Up
+          </Button>
         </div>
       </Content>
     </Layout>
   )
 }
 
-function AppPage() {
-  if (!true) return <SignIn />
-
+function AppPage({
+  setIsAuthenticated,
+}: {
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>
+}) {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Header
@@ -92,7 +191,7 @@ function AppPage() {
           paddingRight: 20,
         }}
       >
-        <HeaderBar isAuthed />
+        <HeaderBar isAuthed setIsAuthenticated={setIsAuthenticated} />
       </Header>
       <Layout>
         <Sider
@@ -123,9 +222,15 @@ function AppPage() {
 }
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
   return (
     <ApolloProvider client={client}>
-      <AppPage />
+      {isAuthenticated ? (
+        <AppPage setIsAuthenticated={setIsAuthenticated} />
+      ) : (
+        <SignIn setIsAuthenticated={setIsAuthenticated} />
+      )}
     </ApolloProvider>
   )
 }
