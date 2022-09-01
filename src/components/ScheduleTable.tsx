@@ -136,16 +136,22 @@ export function ScheduleTable() {
                   width: '100%',
                   padding: 20,
                   boxShadow: '1px 1px 8px -3px #333333',
-                  outline: `2px solid ${textColor}`,
-                  outlineOffset: -2,
-                  backgroundColor,
-                  color: textColor,
                   borderRadius: '4px',
                   display: 'flex',
-                  justifyContent: 'space-between',
                   alignItems: 'center',
+                  gap: 10,
                 }}
               >
+                <div
+                  style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: '50%',
+                    backgroundColor,
+                    border: `2px solid ${textColor}`,
+                    cursor: 'pointer',
+                  }}
+                />
                 <div
                   style={{
                     display: 'flex',
@@ -171,6 +177,7 @@ export function ScheduleTable() {
                     </Tag>
                   </Tooltip>
                 </div>
+                <div style={{ flex: 1 }} />
                 <Tooltip title='Delete Schedule'>
                   <Button
                     icon={<CloseCircleOutlined />}
