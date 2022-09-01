@@ -2,6 +2,7 @@ export type Schedule = {
   title: string
   isActive: number
   id: string
+  color: string
 }
 
 export type Plan = {
@@ -10,6 +11,9 @@ export type Plan = {
   start: string
   end: string
   description: string
+  schedule: {
+    color: string
+  }
 }
 
 export type Friend = {

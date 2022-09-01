@@ -8,6 +8,7 @@ import {
   Divider,
   Empty,
   message,
+  Tooltip,
 } from 'antd'
 import { useEffect, useState } from 'react'
 import {
@@ -20,10 +21,10 @@ import { Friend } from '../types'
 
 export function FriendsList({
   isMinimal,
-  setParentFriends,
+  setSelectedFriends,
 }: {
   isMinimal?: boolean
-  setParentFriends?: React.Dispatch<React.SetStateAction<Friend[]>>
+  setSelectedFriends?: React.Dispatch<React.SetStateAction<Friend[]>>
 }) {
   const [input, setInput] = useState('')
   const [friends, setFriends] = useState<Friend[]>([])
@@ -48,9 +49,8 @@ export function FriendsList({
     }
     if (data) {
       setFriends(data.myFriends)
-      if (setParentFriends) setParentFriends(data.myFriends)
     }
-  }, [myFriends, setParentFriends])
+  }, [myFriends])
 
   // Mutations
   const [addFriend, { error: addFriendError, reset: addFriendReset }] =
@@ -59,20 +59,28 @@ export function FriendsList({
     })
   useEffect(() => {
     if (addFriendError) {
-      message.error('Error adding friends, ' + addFriendError.message)
+      message.error('Error adding friend, ' + addFriendError.message)
       addFriendReset()
     }
-  })
+  }, [addFriendError, addFriendReset])
   const [deleteFriend, { error: delFriendError, reset: delFriendReset }] =
     useMutation(DELETE_FRIEND_MUTATION, {
       refetchQueries: [{ query: MY_FRIENDS }, 'MyFriends'],
     })
   useEffect(() => {
     if (delFriendError) {
-      message.error('Error adding friends, ' + delFriendError.message)
+      message.error('Error deleting friend, ' + delFriendError.message)
       delFriendReset()
     }
-  })
+  }, [delFriendError, delFriendReset])
+
+  const friendIds = friends.map(({ id }) => id)
+  const autoCompleteOptions = users
+    .filter(({ id }) => !friendIds.includes(id))
+    .map(({ name, id }) => ({
+      label: name,
+      value: id,
+    }))
 
   return (
     <>
@@ -81,27 +89,27 @@ export function FriendsList({
         style={{ width: '100%' }}
         value={input}
         onChange={setInput}
-        options={friends.map((friend) => ({
-          label: friend.name,
-          value: friend.id,
-        }))}
-        onSelect={(value: string) =>
+        options={autoCompleteOptions}
+        onSelect={(value: string) => {
           addFriend({ variables: { friendId: value } })
-        }
+          setInput('')
+        }}
+        filterOption={(input, option) => !!option?.value.includes(input)}
       />
       {!isMinimal && <Divider />}
       {!isMinimal && friends.length === 0 && (
         <Empty description='No Friends Found' />
       )}
-      {friends.map(() => {
+      {friends.map(({ id, name }) => {
         if (isMinimal)
           return (
-            <Badge count={<CloseCircleOutlined />}>
-              <Avatar />
+            <Badge count={<CloseCircleOutlined />} key={id}>
+              <Avatar>{name[0].toUpperCase()}</Avatar>
             </Badge>
           )
         return (
           <div
+            key={id}
             style={{
               width: '100%',
               display: 'flex',
@@ -118,10 +126,16 @@ export function FriendsList({
                 alignItems: 'center',
               }}
             >
-              <Avatar />
-              <span>Username</span>
+              <Avatar>{name[0].toUpperCase()}</Avatar>
+              <span>{name}</span>
             </div>
-            <Button icon={<CloseCircleOutlined />} />
+            <Tooltip title='Remove friend'>
+              <Button
+                icon={<CloseCircleOutlined />}
+                type='text'
+                onClick={() => deleteFriend({ variables: { friendId: id } })}
+              />
+            </Tooltip>
           </div>
         )
       })}

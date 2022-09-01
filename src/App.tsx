@@ -4,7 +4,7 @@ import { Button, Divider, Input, Layout, message } from 'antd'
 import { useEffect, useState } from 'react'
 import { client } from './apollo'
 import './App.css'
-import { FriendsList, HeaderBar, ScheduleTable } from './components'
+import { HeaderBar, PlanTable, ScheduleTable } from './components'
 import { SIGN_IN_MUTATION, SIGN_UP_MUTATION } from './constants'
 
 const { Header, Sider, Content } = Layout
@@ -195,16 +195,21 @@ function AppPage({
       </Header>
       <Layout>
         <Sider
-          width={300}
+          width='40%'
           style={{
-            display: 'flex',
-            flexDirection: 'column',
             backgroundColor: 'whitesmoke',
-            padding: 8,
-            paddingTop: 20,
+            padding: 20,
           }}
         >
-          <FriendsList />
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 20,
+            }}
+          >
+            <ScheduleTable />
+          </div>
         </Sider>
         <Content
           style={{
@@ -214,7 +219,7 @@ function AppPage({
             gap: 20,
           }}
         >
-          <ScheduleTable />
+          <PlanTable />
         </Content>
       </Layout>
     </Layout>

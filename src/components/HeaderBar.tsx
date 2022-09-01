@@ -1,8 +1,10 @@
-import { LogoutOutlined, UserOutlined } from '@ant-design/icons'
-import { Button, Popover, Tooltip, Typography } from 'antd'
+import { LogoutOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons'
+import { Button, Drawer, Popover, Space, Typography } from 'antd'
 
 import { Avatar } from 'antd'
+import { useState } from 'react'
 import { client } from '../apollo'
+import { FriendsList } from './FriendsList'
 
 const { Title } = Typography
 
@@ -13,29 +15,41 @@ export function HeaderBar({
   isAuthed: boolean
   setIsAuthenticated?: React.Dispatch<React.SetStateAction<boolean>>
 }) {
+  const [showFriends, setShowFriends] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   return (
     <>
       <Title style={{ margin: 0 }}>Plan-It</Title>
       {isAuthed && (
         <Popover
+          visible={showSettings}
+          onVisibleChange={setShowSettings}
           content={
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', justifyContent: 'right' }}>
-                <Tooltip title='Sign out'>
-                  <Button
-                    type='text'
-                    icon={<LogoutOutlined />}
-                    onClick={() => {
-                      window.localStorage.removeItem('token')
-                      if (setIsAuthenticated) setIsAuthenticated(false)
-                      client.clearStore()
-                    }}
-                  />
-                </Tooltip>
-              </div>
-            </div>
+            <Space direction='vertical'>
+              <Button
+                type='text'
+                icon={<TeamOutlined />}
+                onClick={() => {
+                  setShowFriends(true)
+                  setShowSettings(false)
+                }}
+              >
+                Friends
+              </Button>
+              <Button
+                type='text'
+                icon={<LogoutOutlined />}
+                onClick={() => {
+                  window.localStorage.removeItem('token')
+                  if (setIsAuthenticated) setIsAuthenticated(false)
+                  client.clearStore()
+                }}
+              >
+                Sign out
+              </Button>
+            </Space>
           }
-          title='Username'
+          title=''
           trigger='click'
           placement='bottomRight'
         >
@@ -46,6 +60,13 @@ export function HeaderBar({
           />
         </Popover>
       )}
+      <Drawer
+        onClose={() => setShowFriends(false)}
+        visible={showFriends}
+        title='Friends'
+      >
+        <FriendsList />
+      </Drawer>
     </>
   )
 }
