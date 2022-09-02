@@ -144,6 +144,7 @@ export const CREATE_PLAN_MUTATION = gql`
     $scheduleId: ID!
     $title: String!
     $description: String
+    $users: [String]
   ) {
     createPlan(
       start: $start
@@ -151,12 +152,14 @@ export const CREATE_PLAN_MUTATION = gql`
       scheduleId: $scheduleId
       title: $title
       description: $description
+      users: $users
     ) {
       title
       description
       id
       start
       end
+      userIds
     }
   }
 `

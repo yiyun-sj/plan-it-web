@@ -23,14 +23,17 @@ import {
   DELETE_PLAN_MUTATION,
   MY_PLANS,
   MY_SCHEDULES,
+  MY_USERS,
 } from '../constants'
 import { Friend, Plan, Schedule } from '../types'
 
 export function PlanTable() {
   const [schedules, setSchedules] = useState<Schedule[]>([])
   const [plans, setPlans] = useState<Plan[]>([])
+  const [users, setUsers] = useState<Friend[]>([])
 
   const [search, setSearch] = useState('')
+  const [userSearch, setUserSearch] = useState('')
   const [isVisible, setIsVisible] = useState(false)
 
   const [title, setTitle] = useState('')
@@ -39,10 +42,20 @@ export function PlanTable() {
   const [dates, setDates] = useState<[Moment | null, Moment | null] | null>(
     null
   )
+  const [friendIds, setFriendIds] = useState<string[]>([])
   const [confirmLoading, setConfirmLoading] = useState(false)
-  const [friends, setFriends] = useState<Friend[]>([])
 
-  // Schedules query
+  const myUsers = useQuery(MY_USERS)
+  useEffect(() => {
+    const { error, data } = myUsers
+    if (error) {
+      message.error('Error fetching users, ' + error.message)
+    }
+    if (data) {
+      setUsers(data.getUsers)
+    }
+  }, [myUsers])
+
   const mySchedules = useQuery(MY_SCHEDULES)
   useEffect(() => {
     const { error, data } = mySchedules
@@ -72,6 +85,7 @@ export function PlanTable() {
   useEffect(() => {
     if (createPlanError) {
       message.error('Error creating plan, ' + createPlanError.message)
+      setConfirmLoading(false)
       createPlanReset()
     }
   }, [createPlanError, createPlanReset])
@@ -93,6 +107,17 @@ export function PlanTable() {
       plan.title.toLowerCase().includes(search.toLowerCase())
     )
   }, [plans, search])
+
+  const filteredUserOptions = useMemo(() => {
+    const userOptions = users.map(({ id, name }) => ({
+      value: id,
+      label: name,
+    }))
+    if (!userSearch) return userOptions
+    return userOptions.filter(({ label }) =>
+      label.toLowerCase().includes(userSearch.toLowerCase())
+    )
+  }, [userSearch, users])
 
   return (
     <>
@@ -213,6 +238,7 @@ export function PlanTable() {
               description,
               start: dates[0].toString(),
               end: dates[1].toString(),
+              users: friendIds,
             },
           }).then(() => {
             setConfirmLoading(false)
@@ -220,6 +246,8 @@ export function PlanTable() {
             setTitle('')
             setDescription('')
             setSelectedScheduleId('')
+            setUserSearch('')
+            setFriendIds([])
             setDates(null)
             message.success('Created plan')
           })
@@ -298,6 +326,26 @@ export function PlanTable() {
               value={dates}
               onChange={setDates}
               style={{ flex: 1 }}
+            />
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 20,
+            }}
+          >
+            <span>Users:</span>
+            <Select
+              mode='multiple'
+              allowClear
+              onChange={setFriendIds}
+              style={{ flex: 1 }}
+              placeholder='Add other users to plan'
+              showSearch
+              onSearch={setUserSearch}
+              options={filteredUserOptions}
             />
           </div>
         </div>

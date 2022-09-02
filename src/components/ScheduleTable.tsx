@@ -160,7 +160,7 @@ export function ScheduleTable() {
                   }}
                 >
                   <span>{title}</span>
-                  <Tooltip title={`Set ${isActive ? 'inactive' : 'active'}`}>
+                  <Tooltip title={`Set ${isActive ? 'Inactive' : 'Active'}`}>
                     <Tag
                       color={isActive ? 'success' : 'error'}
                       style={{ cursor: 'pointer' }}
@@ -173,7 +173,7 @@ export function ScheduleTable() {
                         })
                       }
                     >
-                      {isActive ? 'active' : 'inactive'}
+                      {isActive ? 'Active' : 'Inactive'}
                     </Tag>
                   </Tooltip>
                 </div>
