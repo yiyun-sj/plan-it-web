@@ -120,6 +120,7 @@ export const MY_PLANS = gql`
       id
       start
       end
+      userIds
       schedule {
         color
       }
