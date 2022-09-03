@@ -138,6 +138,18 @@ export const GET_PLANS = gql`
     }
   }
 `
+export const GET_PLANS_BY_USER_IDS = gql`
+  query GetPlansByUserIds($users: [String]!) {
+    getPlansByUserIds(users: $users) {
+      title
+      description
+      id
+      start
+      userIds
+      end
+    }
+  }
+`
 export const CREATE_PLAN_MUTATION = gql`
   mutation CreatePlan(
     $start: String!

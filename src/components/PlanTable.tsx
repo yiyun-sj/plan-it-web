@@ -21,6 +21,7 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   CREATE_PLAN_MUTATION,
   DELETE_PLAN_MUTATION,
+  GET_PLANS_BY_USER_IDS,
   MY_PLANS,
   MY_SCHEDULES,
   MY_USERS,
@@ -44,6 +45,7 @@ export function PlanTable() {
   )
   const [friendIds, setFriendIds] = useState<string[]>([])
   const [confirmLoading, setConfirmLoading] = useState(false)
+  const [busyDates, setBusyDates] = useState<[Date, Date][]>([])
 
   const myUsers = useQuery(MY_USERS)
   useEffect(() => {
@@ -77,6 +79,23 @@ export function PlanTable() {
       setPlans(data.myPlans)
     }
   }, [myPlans])
+
+  const plansQuery = useQuery(GET_PLANS_BY_USER_IDS, {
+    variables: { users: friendIds },
+  })
+  useEffect(() => {
+    const { error, data } = plansQuery
+    if (error) {
+      message.error('Error fetching plans, ' + error.message)
+    }
+    if (data) {
+      setBusyDates(
+        data.getPlansByUserIds
+          .map((p: Plan) => [new Date(p.start), new Date(p.end)])
+          .concat(plans.map((p) => [new Date(p.start), new Date(p.end)]))
+      )
+    }
+  }, [plans, plansQuery])
 
   const [createPlan, { error: createPlanError, reset: createPlanReset }] =
     useMutation(CREATE_PLAN_MUTATION, {
@@ -236,8 +255,8 @@ export function PlanTable() {
               scheduleId: selectedScheduleId,
               title,
               description,
-              start: dates[0].toString(),
-              end: dates[1].toString(),
+              start: dates[0].toISOString(),
+              end: dates[1].endOf('day').toISOString(),
               users: friendIds,
             },
           }).then(() => {
@@ -319,21 +338,7 @@ export function PlanTable() {
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: 20,
-            }}
-          >
-            <span>Dates:</span>
-            <DatePicker.RangePicker
-              value={dates}
-              onChange={setDates}
-              style={{ flex: 1 }}
-            />
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 20,
+              paddingBottom: 20,
             }}
           >
             <span>Users:</span>
@@ -348,6 +353,27 @@ export function PlanTable() {
               options={filteredUserOptions}
             />
           </div>
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 20,
+          }}
+        >
+          <span>Dates:</span>
+          <DatePicker.RangePicker
+            value={dates}
+            onChange={setDates}
+            style={{ flex: 1 }}
+            disabledDate={(date) =>
+              busyDates.some(
+                (busyDate) =>
+                  busyDate[0] <= date.toDate() && date.toDate() <= busyDate[1]
+              )
+            }
+          />
         </div>
       </Modal>
     </>
