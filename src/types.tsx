@@ -14,6 +14,7 @@ export type Plan = {
   schedule: {
     color: string
   }
+  userIds: string[]
 }
 
 export type Friend = {

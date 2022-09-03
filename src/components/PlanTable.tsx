@@ -5,6 +5,7 @@ import {
 } from '@ant-design/icons'
 import { useMutation, useQuery } from '@apollo/client'
 import {
+  Avatar,
   Button,
   DatePicker,
   Empty,
@@ -168,13 +169,14 @@ export function PlanTable() {
       ) : (
         <Space direction='vertical'>
           {filteredPlans.map(
-            ({ title, description, id, start, end, schedule }) => {
+            ({ title, description, id, start, end, schedule, userIds }) => {
               const { color } = schedule
               const convertedColor = Color(color)
               const backgroundColor = convertedColor.lightness(92.5).toString()
               const textColor = convertedColor.darken(0.35).toString()
               const startDate = new Date(start)
               const endDate = new Date(end)
+              const planUsers = users.filter(({ id }) => userIds.includes(id))
               return (
                 <div
                   key={id}
@@ -185,7 +187,7 @@ export function PlanTable() {
                     borderRadius: '4px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 20,
+                    gap: 30,
                   }}
                 >
                   <div
@@ -198,19 +200,28 @@ export function PlanTable() {
                       cursor: 'pointer',
                     }}
                   />
+                  <span>
+                    {title}: {description}
+                  </span>
+                  <span>
+                    Dates: {startDate.toISOString().split('T')[0]} -{' '}
+                    {endDate.toISOString().split('T')[0]}
+                  </span>
                   <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 10,
-                    }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 10 }}
                   >
-                    <span>
-                      {title}: {description}
-                    </span>
-                    <span>
-                      {startDate.toDateString()} - {endDate.toDateString()}
-                    </span>
+                    <span>Users: </span>
+                    <Avatar.Group
+                      maxCount={3}
+                      maxPopoverPlacement='top'
+                      maxPopoverTrigger='hover'
+                    >
+                      {planUsers.map(({ name, id }) => (
+                        <Tooltip key={id} title={name}>
+                          <Avatar>{name.toUpperCase()[0]}</Avatar>
+                        </Tooltip>
+                      ))}
+                    </Avatar.Group>
                   </div>
                   <div style={{ flex: 1 }} />
                   <Tooltip title='Delete Plan'>
@@ -238,15 +249,20 @@ export function PlanTable() {
         confirmLoading={confirmLoading}
         onCancel={() => setIsVisible(false)}
         onOk={() => {
-          if (
-            !title ||
-            !description ||
-            !selectedScheduleId ||
-            !dates ||
-            !dates[0] ||
-            !dates[1]
-          ) {
-            message.error('Missing field')
+          if (!title) {
+            message.error('Missing title')
+            return
+          }
+          if (!description) {
+            message.error('Missing description')
+            return
+          }
+          if (!selectedScheduleId) {
+            message.error('Missing schedule')
+            return
+          }
+          if (!dates || !dates[0] || !dates[1]) {
+            message.error('Missing dates')
             return
           }
           setConfirmLoading(true)
